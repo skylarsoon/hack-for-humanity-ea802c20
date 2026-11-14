@@ -152,6 +152,10 @@ function PostEditor({ post, urls, updateById, onChange }: { post: Post; urls: Re
 
 function Senders({ senders, onChange }: { senders: Sender[]; onChange: () => void }) {
   const [f, setF] = useState({ phone: "", name: "", role: "volunteer", vereda: "" });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState({ phone: "", name: "", role: "volunteer", vereda: "" });
+  const [saving, setSaving] = useState(false);
+
   async function add(e: React.FormEvent) {
     e.preventDefault();
     const phone = normalizePhone(f.phone);
@@ -164,6 +168,22 @@ function Senders({ senders, onChange }: { senders: Sender[]; onChange: () => voi
     const { error } = await (await sb()).from("field_senders").update({ active: !s.active }).eq("id", s.id);
     if (error) toast.error(error.message); else onChange();
   }
+  function startEdit(s: Sender) {
+    setEditingId(s.id);
+    setDraft({ phone: s.phone, name: s.name, role: s.role, vereda: s.vereda ?? "" });
+  }
+  async function saveEdit(id: string) {
+    const phone = normalizePhone(draft.phone);
+    if (phone.length < 8) { toast.error("Enter the full number with country code, e.g. +57 300 123 4567"); return; }
+    if (!draft.name.trim()) { toast.error("Enter a name"); return; }
+    setSaving(true);
+    const { error } = await (await sb()).from("field_senders").update({ phone, name: draft.name.trim(), role: draft.role, vereda: draft.vereda.trim() || null }).eq("id", id);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Number updated");
+    setEditingId(null);
+    onChange();
+  }
   return (
     <div className="space-y-3">
       <form onSubmit={add} className="flex flex-wrap gap-2">
@@ -175,10 +195,30 @@ function Senders({ senders, onChange }: { senders: Sender[]; onChange: () => voi
         <Input className="w-36" placeholder="Vereda" aria-label="Vereda" value={f.vereda} onChange={(e) => setF({ ...f, vereda: e.target.value })} />
         <Button type="submit" disabled={!f.phone || !f.name.trim()}>Add number</Button>
       </form>
-      {senders.map((s) => (
-        <div key={s.id} className="flex items-center justify-between rounded-lg border p-2 text-sm">
+      <p className="text-xs text-muted-foreground">Numbers must include the country code — WhatsApp delivers senders in full international format, so +1 971 713 5890 is stored as 19717135890.</p>
+      {senders.map((s) => editingId === s.id ? (
+        <div key={s.id} className="space-y-2 rounded-lg border p-2 text-sm">
+          <div className="flex flex-wrap gap-2">
+            <Input className="w-48" aria-label="Edit WhatsApp number" value={draft.phone} onChange={(e) => setDraft({ ...draft, phone: e.target.value })} />
+            <Input className="w-40" aria-label="Edit name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <select aria-label="Edit role" className={sel} value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })}>
+              <option value="volunteer">Volunteer</option><option value="coordinator">Coordinator</option><option value="crew lead">Crew lead</option><option value="community leader">Community leader</option>
+            </select>
+            <Input className="w-36" placeholder="Vereda" aria-label="Edit vereda" value={draft.vereda} onChange={(e) => setDraft({ ...draft, vereda: e.target.value })} />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" onClick={() => saveEdit(s.id)} disabled={saving}>{saving ? "Saving…" : "Save changes"}</Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} disabled={saving}>Cancel</Button>
+            <Button size="sm" variant={s.active ? "outline" : "secondary"} onClick={() => toggle(s)} disabled={saving}>{s.active ? "Deactivate" : "Reactivate"}</Button>
+          </div>
+        </div>
+      ) : (
+        <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2 text-sm">
           <span><b>{s.name}</b> · +{s.phone} · {s.role}{s.vereda ? ` · ${s.vereda}` : ""}</span>
-          <Button size="sm" variant={s.active ? "outline" : "secondary"} onClick={() => toggle(s)}>{s.active ? "Deactivate" : "Reactivate"}</Button>
+          <span className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => startEdit(s)}>Edit</Button>
+            <Button size="sm" variant={s.active ? "outline" : "secondary"} onClick={() => toggle(s)}>{s.active ? "Deactivate" : "Reactivate"}</Button>
+          </span>
         </div>
       ))}
       {!senders.length && <p className="text-sm text-muted-foreground">No verified numbers yet. Messages from unlisted numbers are ignored.</p>}
