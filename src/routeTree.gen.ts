@@ -12,6 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogIdRouteImport } from './routes/blog.$id'
+import { Route as IdeasARouteImport } from './routes/ideas.a'
+import { Route as IdeasBRouteImport } from './routes/ideas.b'
+import { Route as IdeasCRouteImport } from './routes/ideas.c'
+import { Route as IdeasDRouteImport } from './routes/ideas.d'
 import { Route as StaffCoordinatorRouteImport } from './routes/staff.coordinator'
 import { Route as StaffDashboardRouteImport } from './routes/staff.dashboard'
 import { Route as StaffFieldRouteImport } from './routes/staff.field'
@@ -31,6 +35,26 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
 const BlogIdRoute = BlogIdRouteImport.update({
   id: '/blog/$id',
   path: '/blog/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdeasARoute = IdeasARouteImport.update({
+  id: '/ideas/a',
+  path: '/ideas/a',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdeasBRoute = IdeasBRouteImport.update({
+  id: '/ideas/b',
+  path: '/ideas/b',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdeasCRoute = IdeasCRouteImport.update({
+  id: '/ideas/c',
+  path: '/ideas/c',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdeasDRoute = IdeasDRouteImport.update({
+  id: '/ideas/d',
+  path: '/ideas/d',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaffCoordinatorRoute = StaffCoordinatorRouteImport.update({
@@ -63,6 +87,10 @@ const ApiPublicWhatsappWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog/$id': typeof BlogIdRoute
+  '/ideas/a': typeof IdeasARoute
+  '/ideas/b': typeof IdeasBRoute
+  '/ideas/c': typeof IdeasCRoute
+  '/ideas/d': typeof IdeasDRoute
   '/staff/coordinator': typeof StaffCoordinatorRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/field': typeof StaffFieldRoute
@@ -73,6 +101,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/blog/$id': typeof BlogIdRoute
+  '/ideas/a': typeof IdeasARoute
+  '/ideas/b': typeof IdeasBRoute
+  '/ideas/c': typeof IdeasCRoute
+  '/ideas/d': typeof IdeasDRoute
   '/staff/coordinator': typeof StaffCoordinatorRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/field': typeof StaffFieldRoute
@@ -84,6 +116,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/blog/$id': typeof BlogIdRoute
+  '/ideas/a': typeof IdeasARoute
+  '/ideas/b': typeof IdeasBRoute
+  '/ideas/c': typeof IdeasCRoute
+  '/ideas/d': typeof IdeasDRoute
   '/staff/coordinator': typeof StaffCoordinatorRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/field': typeof StaffFieldRoute
@@ -96,6 +132,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog/$id'
+    | '/ideas/a'
+    | '/ideas/b'
+    | '/ideas/c'
+    | '/ideas/d'
     | '/staff/coordinator'
     | '/staff/dashboard'
     | '/staff/field'
@@ -106,6 +146,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/blog/$id'
+    | '/ideas/a'
+    | '/ideas/b'
+    | '/ideas/c'
+    | '/ideas/d'
     | '/staff/coordinator'
     | '/staff/dashboard'
     | '/staff/field'
@@ -116,6 +160,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/blog/$id'
+    | '/ideas/a'
+    | '/ideas/b'
+    | '/ideas/c'
+    | '/ideas/d'
     | '/staff/coordinator'
     | '/staff/dashboard'
     | '/staff/field'
@@ -127,6 +175,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlogIdRoute: typeof BlogIdRoute
+  IdeasARoute: typeof IdeasARoute
+  IdeasBRoute: typeof IdeasBRoute
+  IdeasCRoute: typeof IdeasCRoute
+  IdeasDRoute: typeof IdeasDRoute
   StaffCoordinatorRoute: typeof StaffCoordinatorRoute
   StaffDashboardRoute: typeof StaffDashboardRoute
   StaffFieldRoute: typeof StaffFieldRoute
@@ -156,6 +208,34 @@ declare module '@tanstack/react-router' {
       path: '/blog/$id'
       fullPath: '/blog/$id'
       preLoaderRoute: typeof BlogIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ideas/a': {
+      id: '/ideas/a'
+      path: '/ideas/a'
+      fullPath: '/ideas/a'
+      preLoaderRoute: typeof IdeasARouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ideas/b': {
+      id: '/ideas/b'
+      path: '/ideas/b'
+      fullPath: '/ideas/b'
+      preLoaderRoute: typeof IdeasBRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ideas/c': {
+      id: '/ideas/c'
+      path: '/ideas/c'
+      fullPath: '/ideas/c'
+      preLoaderRoute: typeof IdeasCRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ideas/d': {
+      id: '/ideas/d'
+      path: '/ideas/d'
+      fullPath: '/ideas/d'
+      preLoaderRoute: typeof IdeasDRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/staff/coordinator': {
@@ -199,6 +279,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlogIdRoute: BlogIdRoute,
+  IdeasARoute: IdeasARoute,
+  IdeasBRoute: IdeasBRoute,
+  IdeasCRoute: IdeasCRoute,
+  IdeasDRoute: IdeasDRoute,
   StaffCoordinatorRoute: StaffCoordinatorRoute,
   StaffDashboardRoute: StaffDashboardRoute,
   StaffFieldRoute: StaffFieldRoute,

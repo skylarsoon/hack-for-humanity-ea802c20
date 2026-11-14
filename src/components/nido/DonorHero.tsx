@@ -2,6 +2,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import groupPhoto from "@/assets/community-group.webp";
 import { useNido } from "@/lib/nido-store";
 import { AFFECTED, BASE_ASSISTED, TOTAL_RAISED_USD, formatMoney } from "@/lib/nido-data";
+import { COMMUNITY_COUNTS, fmtCount } from "@/lib/community-copy";
 
 const GOFUNDME =
   "https://www.gofundme.com/f/support-pijao-families-after-earthquake-and-fires?cp_src=d";
@@ -17,6 +18,16 @@ export function DonorHero({ onSeeBooks }: { onSeeBooks: () => void }) {
       value: `${BASE_ASSISTED + extraAssisted} / ${AFFECTED}`,
     },
     { label: es ? "Recibos publicados" : "Receipts published", value: String(expenses.length) },
+    {
+      label: es ? "Mingas realizadas" : "Mingas held",
+      value: fmtCount(COMMUNITY_COUNTS.mingas),
+      pending: COMMUNITY_COUNTS.mingas === null,
+    },
+    {
+      label: es ? "Ollas compartidas" : "Shared ollas",
+      value: fmtCount(COMMUNITY_COUNTS.ollas),
+      pending: COMMUNITY_COUNTS.ollas === null,
+    },
   ];
 
   return (
@@ -76,11 +87,20 @@ export function DonorHero({ onSeeBooks }: { onSeeBooks: () => void }) {
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <dl className="mt-4 flex flex-wrap gap-x-10 gap-y-4 border-t border-primary-foreground/25 pt-5">
+          <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-primary-foreground/25 pt-5 sm:gap-x-10 lg:flex lg:w-max lg:max-w-[calc(100vw-4rem)] lg:flex-wrap [&>:first-child]:col-span-2">
             {stats.map((s) => (
               <div key={s.label}>
                 <dt className="text-xs text-primary-foreground/75 sm:text-sm">{s.label}</dt>
-                <dd className="mt-1 font-display text-2xl tabular-nums sm:text-3xl">{s.value}</dd>
+                <dd className="mt-1 font-display text-2xl tabular-nums sm:text-3xl">
+                  {s.value}
+                  {"pending" in s && s.pending && (
+                    <span className="sr-only">
+                      {es
+                        ? " (pendiente de conectar los registros)"
+                        : " (records not yet connected)"}
+                    </span>
+                  )}
+                </dd>
               </div>
             ))}
           </dl>
