@@ -22,23 +22,12 @@ const EMBED = `<iframe src="https://nido-abierto.lovable.app/?embed=1" width="10
 const GOFUNDME =
   "https://www.gofundme.com/f/support-pijao-families-after-earthquake-and-fires?cp_src=d";
 
-function LangToggle({
-  value,
-  onChange,
-  onDark,
-}: {
-  value: Lang;
-  onChange: (v: Lang) => void;
-  onDark: boolean;
-}) {
+function LangToggle({ value, onChange }: { value: Lang; onChange: (v: Lang) => void }) {
   return (
     <div
       role="group"
       aria-label={value === "es" ? "Idioma" : "Language"}
-      className={cn(
-        "flex rounded-full border p-0.5 text-xs font-semibold transition-colors",
-        onDark ? "border-primary-foreground/40" : "bg-card",
-      )}
+      className="flex rounded-full border bg-card p-0.5 text-xs font-semibold"
     >
       {(["es", "en"] as const).map((o) => (
         <button
@@ -49,12 +38,8 @@ function LangToggle({
           className={cn(
             "min-h-8 rounded-full px-3 transition-colors",
             value === o
-              ? onDark
-                ? "bg-primary-foreground text-primary"
-                : "bg-primary text-primary-foreground"
-              : onDark
-                ? "text-primary-foreground/85 hover:text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground",
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {o.toUpperCase()}
@@ -68,13 +53,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const { lang, setLang, currency, setCurrency } = useNido();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isStaff = pathname.startsWith("/staff/");
-  const isHome = pathname === "/";
   const es = lang === "es";
   const t = T[lang];
   const headerRef = useRef<HTMLElement>(null);
   const [embedOpen, setEmbedOpen] = useState(false);
-  // On the home page the header floats over the hero until the hero stage scrolls past it.
-  const [onHero, setOnHero] = useState(isHome);
 
   // Publish the header's height so full-screen sections can make room for it.
   useEffect(() => {
@@ -88,51 +70,17 @@ export function SiteShell({ children }: { children: ReactNode }) {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!isHome) {
-      setOnHero(false);
-      return;
-    }
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const stage = document.querySelector("[data-hero-stage]");
-      const headerHeight = headerRef.current?.offsetHeight ?? 0;
-      setOnHero(!!stage && stage.getBoundingClientRect().bottom > headerHeight);
-    };
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-    };
-  }, [isHome]);
-
   return (
     <div className="min-h-screen overflow-x-clip">
       <header
         ref={headerRef}
-        className={cn(
-          "z-[1000] transition-colors duration-300",
-          isHome ? "fixed inset-x-0 top-0" : "sticky top-0",
-          onHero
-            ? "border-b border-transparent bg-transparent text-primary-foreground"
-            : "border-b bg-background/90 text-foreground backdrop-blur",
-        )}
+        className="sticky top-0 z-[1000] border-b bg-background/90 text-foreground backdrop-blur"
       >
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 sm:gap-3">
           <h1 className="mr-auto min-w-0">
             <Link
               to="/"
-              className={cn(
-                "flex items-baseline gap-1.5 font-display text-xl font-semibold whitespace-nowrap sm:text-2xl",
-                !onHero && "text-primary",
-              )}
+              className="flex items-baseline gap-1.5 font-display text-xl font-semibold whitespace-nowrap text-primary sm:text-2xl"
             >
               Nido Abierto
               <span className="hidden font-sans text-sm font-medium opacity-75 sm:inline">
@@ -141,15 +89,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
             </Link>
           </h1>
 
-          <LangToggle value={lang} onChange={setLang} onDark={onHero} />
+          <LangToggle value={lang} onChange={setLang} />
 
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger
               aria-label={es ? "Más opciones" : "More options"}
-              className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
-                onHero ? "hover:bg-primary-foreground/15" : "hover:bg-muted",
-              )}
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-muted"
             >
               <Ellipsis className="h-5 w-5" aria-hidden="true" />
             </DropdownMenuTrigger>
@@ -183,10 +128,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
             href={GOFUNDME}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full bg-[oklch(0.5_0.14_40)] px-4 text-sm font-semibold text-white transition hover:brightness-110 sm:px-5"
+            className="inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[oklch(0.5_0.14_40)] px-3 text-sm font-semibold text-white transition hover:brightness-110 sm:px-5"
           >
             <Heart className="h-4 w-4" aria-hidden="true" />
-            {es ? "Donar" : "Donate"}
+            <span className="sr-only sm:not-sr-only">{es ? "Donar" : "Donate"}</span>
           </a>
         </div>
         {isStaff && (

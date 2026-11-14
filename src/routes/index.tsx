@@ -2,10 +2,11 @@ import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Dashboard } from "@/components/nido/Dashboard";
 import { DonorImpact } from "@/components/nido/DonorImpact";
-import { HeroStage } from "@/components/nido/HeroStage";
+import { CommunityHome } from "@/components/nido/CommunityHome";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNido } from "@/lib/nido-store";
 import { T } from "@/lib/nido-data";
+import { listPublishedPosts } from "@/lib/blog.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,11 +26,14 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  // The journal is a bonus on the homepage: if posts can't load, show the empty state instead of an error page.
+  loader: () => listPublishedPosts().catch(() => []),
   component: DonorPage,
 });
 
 function DonorPage() {
   const { lang } = useNido();
+  const posts = Route.useLoaderData();
   const [tab, setTab] = useState("dash");
   const tabsRef = useRef<HTMLDivElement>(null);
   const seeBooks = () => {
@@ -37,9 +41,9 @@ function DonorPage() {
     tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   return (
-    <div className="space-y-8">
-      <HeroStage lang={lang} onSeeBooks={seeBooks} />
-      <Tabs ref={tabsRef} value={tab} onValueChange={setTab} className="scroll-mt-28">
+    <div className="space-y-16">
+      <CommunityHome posts={posts} onSeeBooks={seeBooks} />
+      <Tabs ref={tabsRef} value={tab} onValueChange={setTab} className="scroll-mt-24">
         <TabsList className="mb-4">
           <TabsTrigger value="dash">{T[lang].dash}</TabsTrigger>
           <TabsTrigger value="build">{T[lang].build}</TabsTrigger>
