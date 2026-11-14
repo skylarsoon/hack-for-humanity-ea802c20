@@ -493,6 +493,57 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_replies: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          delivered_at: string | null
+          expires_at: string
+          failed_at: string | null
+          inbound_message_id: string
+          provider_message_id: string | null
+          read_at: string | null
+          recipient: string
+          request_error: string | null
+          retry_after: string
+          sent_at: string | null
+          state: string
+          status_errors: Json | null
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          delivered_at?: string | null
+          expires_at: string
+          failed_at?: string | null
+          inbound_message_id: string
+          provider_message_id?: string | null
+          read_at?: string | null
+          recipient: string
+          request_error?: string | null
+          retry_after?: string
+          sent_at?: string | null
+          state?: string
+          status_errors?: Json | null
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          delivered_at?: string | null
+          expires_at?: string
+          failed_at?: string | null
+          inbound_message_id?: string
+          provider_message_id?: string | null
+          read_at?: string | null
+          recipient?: string
+          request_error?: string | null
+          retry_after?: string
+          sent_at?: string | null
+          state?: string
+          status_errors?: Json | null
+        }
+        Relationships: []
+      }
       whatsapp_webhook_events: {
         Row: {
           attempts: number
@@ -590,6 +641,10 @@ export type Database = {
           p_vendor: string
         }
         Returns: string
+      }
+      reconcile_whatsapp_reply: {
+        Args: { p_message_id: string }
+        Returns: boolean
       }
     }
     Enums: {

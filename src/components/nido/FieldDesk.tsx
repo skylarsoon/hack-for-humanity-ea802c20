@@ -27,17 +27,21 @@ export function FieldDesk({ households }: { households: { id: string }[] }) {
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [generating, setGenerating] = useState(false);
   const [generationMessage, setGenerationMessage] = useState("");
+  const [replyIssues, setReplyIssues] = useState<string[]>([]);
   const generateDraft = useServerFn(generateBlogDraft);
 
   const load = useCallback(async () => {
     const c = await sb();
-    const [s, u, p] = await Promise.all([
+    const [s, u, p, replies] = await Promise.all([
       c.from("field_senders").select("*").order("name"),
       c.from("field_updates").select("*").order("sent_at", { ascending: false }).limit(200),
       c.from("blog_posts").select("*, blog_post_media(*)").neq("status", "discarded").order("created_at", { ascending: false }).limit(30),
+      c.from("whatsapp_replies").select("state,request_error,status_errors").in("state", ["failed", "unresolved", "sending"]).order("created_at", { ascending: false }).limit(5),
     ]);
     for (const r of [s, u, p]) if (r.error) { toast.error(r.error.message); return; }
     setSenders(s.data ?? []); setUpdates(u.data ?? []); setPosts((p.data ?? []) as Post[]);
+    if (replies.error) toast.error(replies.error.message);
+    else setReplyIssues((replies.data ?? []).map((r) => r.request_error ?? (r.status_errors ? JSON.stringify(r.status_errors) : "Reply outcome is not confirmed; automatic resending is paused.")));
     const paths = (u.data ?? []).filter((x) => x.media_path).map((x) => x.media_path!);
     if (paths.length) {
       const signed = await c.storage.from("field-media").createSignedUrls(paths, 3600);
@@ -93,6 +97,7 @@ export function FieldDesk({ households }: { households: { id: string }[] }) {
         </TabsList>
 
         <TabsContent value="updates" className="space-y-2">
+          {replyIssues.length > 0 && <div role="alert" className="border border-destructive p-3 text-sm text-destructive"><p className="font-semibold">WhatsApp acknowledgment needs attention</p>{replyIssues.map((issue, i) => <p key={i} className="break-words">{issue}</p>)}</div>}
           {updates.map((u) => (
             <div key={u.id} className={`rounded-lg border p-3 ${u.hidden ? "opacity-50" : ""}`}>
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

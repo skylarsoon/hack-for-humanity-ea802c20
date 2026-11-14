@@ -50,6 +50,13 @@
       "when": 1794687015328,
       "tag": "0006_field_media_staff_read",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794690697222,
+      "tag": "0007_whatsapp_reply_tracking",
+      "breakpoints": true
     }
   ]
 }

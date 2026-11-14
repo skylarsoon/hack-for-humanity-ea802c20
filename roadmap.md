@@ -24,3 +24,5 @@ Future scope: connect existing in-memory screens to permanent saving; not part o
 - [x] Connect WhatsApp Business and confirm real field updates arrive.
 - [x] Diagnose missing acknowledgment: Meta status callback reports Business Account locked (131031).
 - [x] Add and verify manual blog draft generation in the staff dashboard; real updates produced a saved bilingual draft and repeat clicks do not reuse them.
+- [x] Sweep reply handling, retries, delivery callbacks, both drafting triggers and public journal views; add durable future acknowledgment tracking, claim guards and status reconciliation without touching settled records.
+- [ ] Verify a new real WhatsApp acknowledgment after Meta clears the account lock; no historical sends are replayed. Known-failed request recovery requires subsequent webhook traffic, so quiet periods delay retries.

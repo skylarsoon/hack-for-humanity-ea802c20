@@ -46,6 +46,16 @@ export function parseInboundMessages(payload: unknown): InboundMessage[] {
 }
 
 export interface DigestCandidate { hidden: boolean; exclude_from_blog: boolean; used_in_post_id: string | null; sender_id: string | null }
+/** Delivery callbacks are separate from inbound updates; keep the whole callback in the inbox. */
+export function parseInboundStatuses(payload: unknown): { id: string }[] {
+  const entry = (obj(payload)["entry"] as unknown[] | undefined)?.[0];
+  const change = (obj(entry)["changes"] as unknown[] | undefined)?.[0];
+  const statuses = obj(obj(change)["value"])["statuses"];
+  return Array.isArray(statuses) ? statuses.flatMap((value) => {
+    const id = str(obj(value)["id"]);
+    return id ? [{ id }] : [];
+  }) : [];
+}
 /** Only visible, unused updates from verified senders go into the next blog draft. */
 export function eligibleForDigest<T extends DigestCandidate>(rows: T[]): T[] {
   return rows.filter((r) => !r.hidden && !r.exclude_from_blog && !r.used_in_post_id && r.sender_id);

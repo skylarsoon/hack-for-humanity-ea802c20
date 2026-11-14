@@ -1,6 +1,7 @@
 // Server-only WhatsApp processing: store verified senders' messages, media and voice-note transcripts.
 import { transcribeAudio } from "@lovable.dev/ai-gateway";
 import { parseInboundMessages } from "./field-updates";
+import { queueAcknowledgment, reconcileStatuses, recoverReplies } from "./whatsapp-replies.server";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/whatsapp";
 const MAX_MEDIA = 16 * 1024 * 1024;
@@ -40,16 +41,7 @@ async function downloadMedia(mediaId: string): Promise<{ bytes: Uint8Array<Array
   return { bytes, mime: res.headers.get("content-type") ?? info.mime_type ?? "application/octet-stream" };
 }
 
-export async function sendText(to: string, body: string) {
-  const res = await fetch(`${GATEWAY}/messages`, {
-    method: "POST",
-    headers: { ...headers(), "Content-Type": "application/json" },
-    body: JSON.stringify({ messaging_product: "whatsapp", to, type: "text", text: { body } }),
-  });
-  if (!res.ok) console.error(`WhatsApp reply failed [${res.status}]: ${await res.text()}`);
-}
-
-const ext = (mime: string) => (mime.split("/")[1] ?? "bin").split(";")[0]!.replace(/[^a-z0-9]/gi, "") || "bin";
+const ext = (mime: string) => ((mime.split("/")[1] ?? "bin").split(";")[0] ?? "bin").replace(/[^a-z0-9]/gi, "") || "bin";
 
 /** Store media for one update; idempotent (skips when already stored). */
 async function storeMedia(updateId: string) {
@@ -79,21 +71,22 @@ export async function processEvent(eventId: string) {
   try {
     if (ev.event === "whatsapp.message") {
       for (const m of parseInboundMessages(ev.payload)) {
-        const { data: sender } = await db.from("field_senders").select("id").eq("phone", m.from).eq("active", true).maybeSingle();
+        const { data: sender, error: senderError } = await db.from("field_senders").select("id").eq("phone", m.from).eq("active", true).maybeSingle();
+        if (senderError) throw senderError;
         if (!sender) continue; // unknown numbers: kept in the inbox, never become field updates
         const ins = await db.from("field_updates").upsert({
           wa_message_id: m.id, sender_id: sender.id, sender_phone: m.from, kind: m.kind, text: m.text,
           media_id: m.mediaId, media_mime: m.mime, media_status: m.mediaId ? "pending" : "none", sent_at: m.sentAt,
         }, { onConflict: "wa_message_id", ignoreDuplicates: true }).select("id");
         if (ins.error) throw ins.error;
-        const created = ins.data?.[0];
         const { data: row, error: rErr } = await db.from("field_updates").select("id").eq("wa_message_id", m.id).single();
         if (rErr) throw rErr;
+        await queueAcknowledgment(m.id, m.from, m.sentAt);
         await storeMedia(row.id);
-        if (created) await sendText(m.from, "Recibido, ¡gracias! 🙌 Received, thank you!");
       }
     }
-    // Statuses and other events need no processing; they stay in the inbox for the record.
+    if (ev.event === "whatsapp.status") await reconcileStatuses(ev.payload);
+    // Unknown events remain durably stored without creating field updates.
     const fin = await db.from("whatsapp_webhook_events").update({ processed_at: new Date().toISOString(), processing_error: null }).eq("id", ev.id);
     if (fin.error) throw fin.error;
   } catch (e) {
@@ -105,8 +98,10 @@ export async function processEvent(eventId: string) {
 /** Retry a few unfinished events (least-attempted first) so one failing row cannot block the rest. */
 export async function recoverPending(skipId: string) {
   const db = await admin();
-  const { data } = await db.from("whatsapp_webhook_events").select("id").is("processed_at", null).neq("id", skipId)
+  const { data, error } = await db.from("whatsapp_webhook_events").select("id").is("processed_at", null).neq("id", skipId)
     .lt("attempts", 8).lt("received_at", new Date(Date.now() - 60_000).toISOString())
     .order("attempts").order("received_at").limit(2);
+  if (error) throw error;
   for (const r of data ?? []) await processEvent(r.id).catch(() => {});
+  await recoverReplies();
 }
