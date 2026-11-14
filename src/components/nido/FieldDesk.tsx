@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CATEGORIES } from "@/lib/donor-impact";
 import { normalizePhone } from "@/lib/field-updates";
+import { whatsappSendingRestriction } from "@/lib/whatsapp-account";
 import type { Database } from "@/integrations/supabase/types";
 
 type Tbl = Database["public"]["Tables"];
@@ -28,18 +29,22 @@ export function FieldDesk({ households }: { households: { id: string }[] }) {
   const [generating, setGenerating] = useState(false);
   const [generationMessage, setGenerationMessage] = useState("");
   const [replyIssues, setReplyIssues] = useState<string[]>([]);
+  const [accountRestriction, setAccountRestriction] = useState<string | null>(null);
   const generateDraft = useServerFn(generateBlogDraft);
 
   const load = useCallback(async () => {
     const c = await sb();
-    const [s, u, p, replies] = await Promise.all([
+    const [s, u, p, replies, accountEvents] = await Promise.all([
       c.from("field_senders").select("*").order("name"),
       c.from("field_updates").select("*").order("sent_at", { ascending: false }).limit(200),
       c.from("blog_posts").select("*, blog_post_media(*)").neq("status", "discarded").order("created_at", { ascending: false }).limit(30),
       c.from("whatsapp_replies").select("state,request_error,status_errors").in("state", ["failed", "unresolved", "sending"]).order("created_at", { ascending: false }).limit(5),
+      c.from("whatsapp_webhook_events").select("event,payload,received_at").in("event", ["whatsapp.status", "whatsapp.account_update"]).order("received_at", { ascending: false }).limit(1000),
     ]);
     for (const r of [s, u, p]) if (r.error) { toast.error(r.error.message); return; }
     setSenders(s.data ?? []); setUpdates(u.data ?? []); setPosts((p.data ?? []) as Post[]);
+    if (accountEvents.error) toast.error(accountEvents.error.message);
+    else setAccountRestriction(whatsappSendingRestriction(accountEvents.data ?? []));
     if (replies.error) toast.error(replies.error.message);
     else setReplyIssues((replies.data ?? []).map((r) => r.request_error ?? (r.status_errors ? JSON.stringify(r.status_errors) : "Reply outcome is not confirmed; automatic resending is paused.")));
     const paths = (u.data ?? []).filter((x) => x.media_path).map((x) => x.media_path!);
@@ -89,6 +94,7 @@ export function FieldDesk({ households }: { households: { id: string }[] }) {
     <div className="rounded-xl bg-card p-4 shadow-card">
       <h3 className="mb-1 text-xl font-semibold">Field updates & blog</h3>
       <p className="mb-3 text-sm text-muted-foreground">Messages, photos and voice notes from verified WhatsApp numbers. The AI writes a draft post every 2 days; nothing goes public until you publish it.</p>
+      {accountRestriction && <div role="alert" className="mb-3 border border-destructive p-3 text-sm text-destructive">{accountRestriction}</div>}
       <Tabs defaultValue="updates">
         <TabsList>
           <TabsTrigger value="updates">Field updates ({updates.length})</TabsTrigger>

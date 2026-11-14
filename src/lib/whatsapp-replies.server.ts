@@ -1,4 +1,5 @@
 import { parseInboundStatuses } from "./field-updates";
+import { sendingRestriction } from "./whatsapp-account.server";
 
 const gateway = "https://connector-gateway.lovable.dev/whatsapp";
 const admin = async () => (await import("@/integrations/supabase/client.server")).supabaseAdmin;
@@ -8,6 +9,7 @@ export async function sendAcknowledgment(inboundId: string) {
   const lovable = process.env["LOVABLE_API_KEY"];
   const wa = process.env["WHATSAPP_API_KEY"];
   if (!lovable || !wa) throw new Error("WhatsApp connection is not configured");
+  if (await sendingRestriction()) return;
   const db = await admin();
   const claim = await db.from("whatsapp_replies").update({ state: "sending" })
     .eq("inbound_message_id", inboundId).in("state", ["pending", "failed"])
@@ -66,6 +68,7 @@ export async function reconcileStatuses(payload: unknown) {
 
 /** Called by subsequent webhook traffic: quiet periods delay known-failed request recovery. */
 export async function recoverReplies() {
+  if (await sendingRestriction()) return;
   const db = await admin();
   const now = new Date().toISOString();
   const rows = await db.from("whatsapp_replies").select("inbound_message_id").in("state", ["pending", "failed"]).is("provider_message_id", null).lt("attempt_count", 3).lte("retry_after", now).gt("expires_at", now).order("retry_after").limit(2);

@@ -1,12 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({ from: vi.fn(), rpc: vi.fn() }));
+const restriction = vi.hoisted(() => vi.fn(async (): Promise<string | null> => null));
+vi.mock("../lib/whatsapp-account.server", () => ({ sendingRestriction: restriction }));
 vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: db }));
 import { sendAcknowledgment } from "../lib/whatsapp-replies.server";
 
 describe("acknowledgment send outcomes", () => {
   afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.clearAllMocks(); });
   function setup(claimed = true) {
+    restriction.mockResolvedValue(null);
     vi.stubEnv("LOVABLE_API_KEY", "test-only");
     vi.stubEnv("WHATSAPP_API_KEY", "test-only");
     const saves: unknown[] = [];
@@ -31,6 +34,15 @@ describe("acknowledgment send outcomes", () => {
     await sendAcknowledgment("inbound-1");
     expect(saves).toEqual([expect.objectContaining({ state: "accepted", provider_message_id: "wa-reply" })]);
     expect(db.rpc).toHaveBeenCalledWith("reconcile_whatsapp_reply", { p_message_id: "wa-reply" });
+  });
+  it("does not claim or send a reply while Meta has locked the account", async () => {
+    setup();
+    restriction.mockResolvedValue("Business Account locked (131031)");
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    await sendAcknowledgment("inbound-1");
+    expect(db.from).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
   });
   it("stores request rejection without claiming delivery", async () => {
     const saves = setup();

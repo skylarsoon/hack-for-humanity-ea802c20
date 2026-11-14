@@ -26,3 +26,4 @@ Future scope: connect existing in-memory screens to permanent saving; not part o
 - [x] Add and verify manual blog draft generation in the staff dashboard; real updates produced a saved bilingual draft and repeat clicks do not reuse them.
 - [x] Sweep reply handling, retries, delivery callbacks, both drafting triggers and public journal views; add durable future acknowledgment tracking, claim guards and status reconciliation without touching settled records.
 - [ ] Verify a new real WhatsApp acknowledgment after Meta clears the account lock; no historical sends are replayed. Known-failed request recovery requires subsequent webhook traffic, so quiet periods delay retries.
+- [x] Check account restrictions across initial replies, recovery, signed callbacks and coordinator tabs; block future automatic sends using stored Meta evidence without changing settled records or connection settings.
