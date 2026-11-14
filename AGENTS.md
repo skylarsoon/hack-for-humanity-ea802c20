@@ -40,3 +40,5 @@ use the editor.
 - Public household search uses the browser-safe public-household-search helper and searches only ID and vereda, so private names cannot be discovered through filtering.
 - Anonymous database household reads must use the public_households view or explicitly granted columns; names, coordinates and notes are staff-only. Household changes use private data-free notifications instead of raw realtime row payloads to avoid leaking private columns.
 - Database approvals use security-invoker transactional functions so expenses, items, household needs and cost totals commit together and duplicate receipts cannot double-count.
+- WhatsApp field updates enter only through the signed /api/public/whatsapp/webhook receiver, which stores each delivery in whatsapp_webhook_events before processing so retries never double-store; unknown numbers never become field updates.
+- AI blog drafts are written by the cron-authenticated /api/public/jobs/blog-digest route with a database lock and pause state; posts stay drafts until a coordinator publishes, and public pages read only published posts with short-lived photo links.

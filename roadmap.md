@@ -19,3 +19,6 @@
 - [x] Verify sample and fallback approval flows without changing dashboard or field-crew presentation.
 - [x] Real photo analysis connected to Gemini through Lovable Cloud.
 Future scope: connect existing in-memory screens to permanent saving; not part of this schema-only request.
+## WhatsApp field updates → blog
+- [x] Verified senders, WhatsApp inbox, field updates, bilingual AI drafts every 2 days, coordinator review, public field journal.
+- [ ] Connect WhatsApp Business: user skipped the connect card; needed before messages arrive.
