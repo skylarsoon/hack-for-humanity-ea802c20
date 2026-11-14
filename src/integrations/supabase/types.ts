@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      blog_post_media: {
+        Row: {
+          caption_en: string
+          caption_es: string
+          position: number
+          post_id: string
+          update_id: string
+        }
+        Insert: {
+          caption_en?: string
+          caption_es?: string
+          position?: number
+          post_id: string
+          update_id: string
+        }
+        Update: {
+          caption_en?: string
+          caption_es?: string
+          position?: number
+          post_id?: string
+          update_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_media_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_post_media_update_id_fkey"
+            columns: ["update_id"]
+            isOneToOne: false
+            referencedRelation: "field_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          body_en: string
+          body_es: string
+          created_at: string
+          id: string
+          period_end: string | null
+          period_start: string | null
+          published_at: string | null
+          status: string
+          title_en: string
+          title_es: string
+        }
+        Insert: {
+          body_en: string
+          body_es: string
+          created_at?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          published_at?: string | null
+          status?: string
+          title_en: string
+          title_es: string
+        }
+        Update: {
+          body_en?: string
+          body_es?: string
+          created_at?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          published_at?: string | null
+          status?: string
+          title_en?: string
+          title_es?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string
@@ -172,6 +250,128 @@ export type Database = {
           },
         ]
       }
+      field_senders: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          role: string
+          vereda: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          role?: string
+          vereda?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          role?: string
+          vereda?: string | null
+        }
+        Relationships: []
+      }
+      field_updates: {
+        Row: {
+          category: Database["public"]["Enums"]["impact_category"] | null
+          created_at: string
+          exclude_from_blog: boolean
+          hidden: boolean
+          household_id: string | null
+          id: string
+          kind: string
+          media_id: string | null
+          media_mime: string | null
+          media_path: string | null
+          media_status: string
+          sender_id: string | null
+          sender_phone: string
+          sent_at: string
+          text: string
+          transcript: string | null
+          used_in_post_id: string | null
+          wa_message_id: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["impact_category"] | null
+          created_at?: string
+          exclude_from_blog?: boolean
+          hidden?: boolean
+          household_id?: string | null
+          id?: string
+          kind: string
+          media_id?: string | null
+          media_mime?: string | null
+          media_path?: string | null
+          media_status?: string
+          sender_id?: string | null
+          sender_phone: string
+          sent_at?: string
+          text?: string
+          transcript?: string | null
+          used_in_post_id?: string | null
+          wa_message_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["impact_category"] | null
+          created_at?: string
+          exclude_from_blog?: boolean
+          hidden?: boolean
+          household_id?: string | null
+          id?: string
+          kind?: string
+          media_id?: string | null
+          media_mime?: string | null
+          media_path?: string | null
+          media_status?: string
+          sender_id?: string | null
+          sender_phone?: string
+          sent_at?: string
+          text?: string
+          transcript?: string | null
+          used_in_post_id?: string | null
+          wa_message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_updates_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_updates_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "public_households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_updates_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "field_senders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_updates_used_in_post_id_fkey"
+            columns: ["used_in_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       household_needs: {
         Row: {
           category: Database["public"]["Enums"]["impact_category"]
@@ -272,6 +472,60 @@ export type Database = {
         }
         Relationships: []
       }
+      job_state: {
+        Row: {
+          last_run_at: string | null
+          locked_until: string | null
+          name: string
+          paused_reason: string | null
+        }
+        Insert: {
+          last_run_at?: string | null
+          locked_until?: string | null
+          name: string
+          paused_reason?: string | null
+        }
+        Update: {
+          last_run_at?: string | null
+          locked_until?: string | null
+          name?: string
+          paused_reason?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_webhook_events: {
+        Row: {
+          attempts: number
+          delivery_id: string
+          event: string
+          id: string
+          payload: Json
+          processed_at: string | null
+          processing_error: string | null
+          received_at: string
+        }
+        Insert: {
+          attempts?: number
+          delivery_id: string
+          event: string
+          id?: string
+          payload: Json
+          processed_at?: string | null
+          processing_error?: string | null
+          received_at?: string
+        }
+        Update: {
+          attempts?: number
+          delivery_id?: string
+          event?: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          processing_error?: string | null
+          received_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       category_totals: {
@@ -314,6 +568,10 @@ export type Database = {
       }
     }
     Functions: {
+      acquire_job_lock: {
+        Args: { p_name: string; p_seconds: number }
+        Returns: boolean
+      }
       approve_census: {
         Args: { p_document_id: string; p_household_id: string; p_items: Json }
         Returns: number

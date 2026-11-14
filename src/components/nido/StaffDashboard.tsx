@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { FieldDesk } from "./FieldDesk";
 import { Download, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -210,6 +211,8 @@ export function StaffDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <FieldDesk households={data.households} />
     </div>
   );
 }

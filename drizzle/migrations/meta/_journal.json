@@ -36,6 +36,20 @@
       "when": 1794683291619,
       "tag": "0004_seed_nido_starter_data",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794687000229,
+      "tag": "0005_field_updates_blog",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794687015328,
+      "tag": "0006_field_media_staff_read",
+      "breakpoints": true
     }
   ]
 }

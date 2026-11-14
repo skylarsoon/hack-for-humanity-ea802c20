@@ -1,0 +1,1 @@
+CREATE POLICY field_media_staff_read ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'field-media');

@@ -163,6 +163,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 <DropdownMenuRadioItem value="USD">USD · US dollar</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
               <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/blog">{es ? "Diario de campo" : "Field journal"}</Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setEmbedOpen(true)}>
                 <Code2 aria-hidden="true" /> {t.embed}
               </DropdownMenuItem>

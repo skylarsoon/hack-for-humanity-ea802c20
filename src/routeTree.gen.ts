@@ -10,13 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogIdRouteImport } from './routes/blog.$id'
 import { Route as StaffCoordinatorRouteImport } from './routes/staff.coordinator'
 import { Route as StaffDashboardRouteImport } from './routes/staff.dashboard'
 import { Route as StaffFieldRouteImport } from './routes/staff.field'
+import { Route as ApiPublicJobsBlogDigestRouteImport } from './routes/api/public/jobs/blog-digest'
+import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIdRoute = BlogIdRouteImport.update({
+  id: '/blog/$id',
+  path: '/blog/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaffCoordinatorRoute = StaffCoordinatorRouteImport.update({
@@ -34,44 +48,91 @@ const StaffFieldRoute = StaffFieldRouteImport.update({
   path: '/staff/field',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsBlogDigestRoute = ApiPublicJobsBlogDigestRouteImport.update({
+  id: '/api/public/jobs/blog-digest',
+  path: '/api/public/jobs/blog-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicWhatsappWebhookRoute =
+  ApiPublicWhatsappWebhookRouteImport.update({
+    id: '/api/public/whatsapp/webhook',
+    path: '/api/public/whatsapp/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/blog/$id': typeof BlogIdRoute
   '/staff/coordinator': typeof StaffCoordinatorRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/field': typeof StaffFieldRoute
+  '/blog/': typeof BlogIndexRoute
+  '/api/public/jobs/blog-digest': typeof ApiPublicJobsBlogDigestRoute
+  '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/blog/$id': typeof BlogIdRoute
   '/staff/coordinator': typeof StaffCoordinatorRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/field': typeof StaffFieldRoute
+  '/blog': typeof BlogIndexRoute
+  '/api/public/jobs/blog-digest': typeof ApiPublicJobsBlogDigestRoute
+  '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/blog/$id': typeof BlogIdRoute
   '/staff/coordinator': typeof StaffCoordinatorRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/field': typeof StaffFieldRoute
+  '/blog/': typeof BlogIndexRoute
+  '/api/public/jobs/blog-digest': typeof ApiPublicJobsBlogDigestRoute
+  '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/staff/coordinator' | '/staff/dashboard' | '/staff/field'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/staff/coordinator' | '/staff/dashboard' | '/staff/field'
-  id:
-    | '__root__'
+  fullPaths:
     | '/'
+    | '/blog/$id'
     | '/staff/coordinator'
     | '/staff/dashboard'
     | '/staff/field'
+    | '/blog/'
+    | '/api/public/jobs/blog-digest'
+    | '/api/public/whatsapp/webhook'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/blog/$id'
+    | '/staff/coordinator'
+    | '/staff/dashboard'
+    | '/staff/field'
+    | '/blog'
+    | '/api/public/jobs/blog-digest'
+    | '/api/public/whatsapp/webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/blog/$id'
+    | '/staff/coordinator'
+    | '/staff/dashboard'
+    | '/staff/field'
+    | '/blog/'
+    | '/api/public/jobs/blog-digest'
+    | '/api/public/whatsapp/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BlogIdRoute: typeof BlogIdRoute
   StaffCoordinatorRoute: typeof StaffCoordinatorRoute
   StaffDashboardRoute: typeof StaffDashboardRoute
   StaffFieldRoute: typeof StaffFieldRoute
+  BlogIndexRoute: typeof BlogIndexRoute
+  ApiPublicJobsBlogDigestRoute: typeof ApiPublicJobsBlogDigestRoute
+  ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -81,6 +142,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$id': {
+      id: '/blog/$id'
+      path: '/blog/$id'
+      fullPath: '/blog/$id'
+      preLoaderRoute: typeof BlogIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/staff/coordinator': {
@@ -104,14 +179,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffFieldRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/blog-digest': {
+      id: '/api/public/jobs/blog-digest'
+      path: '/api/public/jobs/blog-digest'
+      fullPath: '/api/public/jobs/blog-digest'
+      preLoaderRoute: typeof ApiPublicJobsBlogDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/whatsapp/webhook': {
+      id: '/api/public/whatsapp/webhook'
+      path: '/api/public/whatsapp/webhook'
+      fullPath: '/api/public/whatsapp/webhook'
+      preLoaderRoute: typeof ApiPublicWhatsappWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BlogIdRoute: BlogIdRoute,
   StaffCoordinatorRoute: StaffCoordinatorRoute,
   StaffDashboardRoute: StaffDashboardRoute,
   StaffFieldRoute: StaffFieldRoute,
+  BlogIndexRoute: BlogIndexRoute,
+  ApiPublicJobsBlogDigestRoute: ApiPublicJobsBlogDigestRoute,
+  ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
