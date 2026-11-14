@@ -5,7 +5,7 @@
 - [x] Verify live permissions, category totals, twelve isolated PostgreSQL approval tests and regenerated types.
 - [x] Enable email sign-in.
 - [ ] Disable public signup: user must turn on Disable sign-up under More → Users → Auth settings because current unrelated hosted settings cannot be safely read.
-- [ ] Create coordinator@nidoabierto.org: user must choose a password securely under More → Users → Add user → Create new user.
+- [x] Confirm the coordinator account exists and can open the dashboard.
 
 ## Workbench document review
 
@@ -21,4 +21,6 @@
 Future scope: connect existing in-memory screens to permanent saving; not part of this schema-only request.
 ## WhatsApp field updates → blog
 - [x] Verified senders, WhatsApp inbox, field updates, bilingual AI drafts every 2 days, coordinator review, public field journal.
-- [ ] Connect WhatsApp Business: user skipped the connect card; needed before messages arrive.
+- [x] Connect WhatsApp Business and confirm real field updates arrive.
+- [x] Diagnose missing acknowledgment: Meta status callback reports Business Account locked (131031).
+- [x] Add and verify manual blog draft generation in the staff dashboard; real updates produced a saved bilingual draft and repeat clicks do not reuse them.

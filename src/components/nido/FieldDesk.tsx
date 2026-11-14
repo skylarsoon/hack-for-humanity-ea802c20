@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { LoaderCircle, Sparkles } from "lucide-react";
+import { generateBlogDraft } from "@/lib/blog-digest.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +25,9 @@ export function FieldDesk({ households }: { households: { id: string }[] }) {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [generating, setGenerating] = useState(false);
+  const [generationMessage, setGenerationMessage] = useState("");
+  const generateDraft = useServerFn(generateBlogDraft);
 
   const load = useCallback(async () => {
     const c = await sb();
@@ -46,6 +52,33 @@ export function FieldDesk({ households }: { households: { id: string }[] }) {
   async function patchUpdate(id: string, patch: Tbl["field_updates"]["Update"]) {
     const { error } = await (await sb()).from("field_updates").update(patch).eq("id", id);
     if (error) toast.error(error.message); else setUpdates((l) => l.map((u) => (u.id === id ? { ...u, ...patch } as Update : u)));
+  }
+
+  async function createDraft() {
+    if (generating) return;
+    setGenerating(true);
+    setGenerationMessage("");
+    try {
+      const result = await generateDraft();
+      const messages: Record<string, string> = {
+        draft_created: "Spanish and English draft created — awaiting your review.",
+        no_updates: "No unused field updates are available for a new draft.",
+        busy_or_paused: "Drafting is already running or paused. Please check again later.",
+        paused: "Drafting is paused because AI credits or workspace permissions need attention.",
+        rate_limited: "AI is temporarily busy. Please try again later.",
+      };
+      setGenerationMessage(messages[result.status] ?? "Drafting did not finish.");
+      if (result.status === "draft_created") {
+        toast.success("Blog draft created");
+        await load();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not generate a draft.";
+      setGenerationMessage(message);
+      toast.error(message);
+    } finally {
+      setGenerating(false);
+    }
   }
 
   return (
@@ -95,6 +128,13 @@ export function FieldDesk({ households }: { households: { id: string }[] }) {
         </TabsContent>
 
         <TabsContent value="blog" className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button onClick={createDraft} disabled={generating}>
+              {generating ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" /> : <Sparkles className="size-4" />}
+              {generating ? "Generating draft…" : "Generate draft now"}
+            </Button>
+            <p role="status" className="text-sm text-muted-foreground">{generationMessage}</p>
+          </div>
           {posts.map((p) => <PostEditor key={p.id} post={p} urls={urls} updateById={updateById} onChange={load} />)}
           {!posts.length && <p className="py-6 text-center text-sm text-muted-foreground">No posts yet. The first draft appears after updates come in.</p>}
         </TabsContent>
